@@ -2,13 +2,14 @@ package com.example.mapeo.controllers;
 
 import com.example.mapeo.dtos.UserRequestDTO;
 import com.example.mapeo.dtos.UserResponseDTO;
+import com.example.mapeo.exceptions.NotFoundException;
 import com.example.mapeo.services.UserService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -30,15 +31,15 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         UserResponseDTO user = this.service.show(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+        if (user == null) {
+            throw new NotFoundException("id:" +  id);
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(user);
+
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> store(@RequestBody UserRequestDTO user) {
-        log.info("Request" + user);
+    public ResponseEntity<?> store(@Valid @RequestBody UserRequestDTO user) {
         return ResponseEntity.status(CREATED).body(this.service.store(user));
     }
 
